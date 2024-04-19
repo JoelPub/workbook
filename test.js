@@ -27,14 +27,14 @@ function SetRowCanEdit(row) {
     }
     if (editType) {
       row.cells[j].onclick = function () {
-        EditCell(this);
+        EditCell(this, null, row);
       };
     }
   }
 }
 
 //设置指定单元格可编辑
-function EditCell(element, editType) {
+function EditCell(element, editType, editRow) {
   var editType = element.getAttribute("EditType");
   if (!editType) {
     //如果当前单元格没有指定，则查看当前列是否指定
@@ -48,11 +48,49 @@ function EditCell(element, editType) {
     case "TextBox":
       CreateTextBox(element, element.innerHTML);
       break;
+    case "AddSubA":
+      AddSubA(document.getElementById("tabProduct"));
+      break;
+    case "AddSubAA":
+      AddSubAA(document.getElementById("tabProduct"), editRow);
+      break;
     default:
       break;
   }
 }
 
+//添加行
+function AddSubA(table, index) {
+  var lastRow = table.rows[table.rows.length - 1];
+  var newRow = lastRow.cloneNode(true);
+  newRow.cells[0].innerHTML = "1-1";
+  $(table.rows).each(function (index) {
+    console.log(this.cells[0].innerHTML);
+    if (/[0-9]-[0-9]/.test(this.cells[0].innerHTML))
+      newRow.cells[0].innerHTML =
+        "1-" +
+        (Number(this.cells[0].innerHTML[this.cells[0].innerHTML.length - 1]) +
+          1);
+  });
+  newRow.cells[1].innerHTML = "";
+  newRow.cells[1].setAttribute("EditType", "AddSubAA");
+  if (newRow) table.tBodies[0].appendChild(newRow);
+
+  SetRowCanEdit(newRow);
+  return newRow;
+}
+
+function AddSubAA(table, r) {
+  var lastRow = table.rows[table.rows.length - 1];
+  var newRow = lastRow.cloneNode(true);
+  newRow.cells[0].innerHTML = "";
+  newRow.cells[1].innerHTML = "";
+  newRow.cells[1].setAttribute("EditType", "TextBox");
+  if (newRow) table.tBodies[0].insertBefore(newRow, r.nextSibling);
+
+  SetRowCanEdit(newRow);
+  return newRow;
+}
 //为单元格创建可编辑输入框
 function CreateTextBox(element, value) {
   //检查编辑状态，如果已经是编辑状态，跳过
@@ -105,19 +143,6 @@ function CancelEditCell(element, value, text) {
 //清空指定对象的所有字节点
 function ClearChild(element) {
   element.innerHTML = "";
-}
-
-//添加行
-function AddRow(table, index) {
-  var lastRow = table.rows[table.rows.length - 1];
-  var newRow = lastRow.cloneNode(true);
-  //计算新增加行的序号，需要引入jquery 的jar包
-  var startIndex = $.inArray(lastRow, table.rows);
-  var endIndex = table.rows;
-  table.tBodies[0].appendChild(newRow);
-  newRow.cells[1].innerHTML = startIndex + 1;
-  SetRowCanEdit(newRow);
-  return newRow;
 }
 
 //提取表格的值,JSON格式
