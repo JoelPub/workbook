@@ -1,0 +1,36 @@
+<!-- JQuery -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+<!-- CSS Style -->
+
+<style type="text/css">
+br { display: none; }
+ textarea{display: block;margin: 10px 0; width:100%; border: 1px solid #333;}
+ 
+ iframe{display: block;margin: 10px 0; width:100%; resize:both; overflow: auto; border: 1px solid #333;}
+</style>
+
+<!-- JavaScript -->
+
+<script type="text/javascript">
+ function updateIframe(){
+ var myFrame = $("#myframe").contents().find('body');
+ var textareaValue = $("textarea").val();
+ myFrame.html(textareaValue);
+ }
+</script>
+<h1><font face="Calibri" color="#23395d">See Your HTML Code Preview</font></h1>
+
+<textarea rows="5" cols="50" placeholder="Type HTML Code Here"></textarea>
+
+<button style="border:1" type="button" onclick="updateIframe()"><i class="fa fa-pencil-square-o"></i>Run The Code</button>
+
+<iframe id="myframe"></iframe>
+
+<div>
+	<p align="center"><span style="text-decoration: none"><b>
+	<font face="Calibri">Created By Manav Vashisht</font><font color="#FF0000" face="Calibri"> <p>
+  <font color="#FF0000" face="Calibri"><span style="text-decoration: none"></span></font></p></b></div>
+  <p COLOR="#000000">Visit my meeting website :- <a href="https://2xwkj.sse.codesandbox.io/">Meet Us</a></P>
+    <p COLOR="#000000">Want to see preview of all three codes (HTML,CSS,JS) GO TO<a href="https://sslmm.csb.app/"> netEDITOR</a></P>
