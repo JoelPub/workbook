@@ -87,12 +87,13 @@ function AddSubAA() {
   newRow.cells[1].innerHTML = "";
   newRow.cells[1].setAttribute("EditType", "TextBox");
   newRow.cells[2].innerHTML = "";
+  newRow.cells[2].setAttribute("name", "Amount");
   newRow.cells[2].setAttribute("EditType", "TextBox");
   newRow.cells[3].innerHTML = "";
+  newRow.cells[3].setAttribute("name", "Price");
   newRow.cells[3].setAttribute("EditType", "TextBox");
   newRow.cells[4].innerHTML = "0";
   newRow.cells[4].setAttribute("Expression", "Amount*Price");
-  newRow.cells[4].setAttribute("Format", "#,###.00");
   newRow.cells[4].setAttribute("CalType", "first");
   if (newRow)
     table.tBodies[0].insertBefore(
@@ -172,8 +173,8 @@ function GetTableData(table) {
 function GetRowData(row) {
   var rowData = {};
   for (var j = 0; j < row.cells.length; j++) {
-    name = row.parentNode.rows[0].cells[j].getAttribute("Name");
-    if (name) {
+    name = row.cells[j].getAttribute("Name");
+    if (name && name != "null") {
       var value = row.cells[j].getAttribute("Value");
       if (!value) {
         value = row.cells[j].innerHTML;
@@ -194,13 +195,7 @@ function CheckExpression(row) {
   //如指定了公式则要求计算
   if (expn) {
     var result = Expression(row, expn);
-    var format = row.cells[4].getAttribute("Format");
-    if (format) {
-      //如指定了格式，进行字值格式化
-      row.cells[4].innerHTML = formatNumber(Expression(row, expn), format);
-    } else {
-      row.cells[4].innerHTML = Expression(row, expn);
-    }
+    row.cells[4].innerHTML = Expression(row, expn);
     CalAll();
   }
   // }
@@ -208,108 +203,44 @@ function CheckExpression(row) {
 function CalAll() {
   var fistArr = [],
     secondArr = [];
-  $("td[CalType='second']")[0].innerHTML = $(
-    "td[CalType='first']",
-  )[0].innerHTML;
-  $("td[CalType='first']").each((index, element) => {
-    fistArr.push(Number(element.innerHTML));
-  });
-  $("td[CalType='second']")[0].innerHTML = fistArr.reduce(
-    (previousValue, currentValue) => previousValue + currentValue,
-  );
-  $("td[CalType='third']")[0].innerHTML = $(
-    "td[CalType='second']",
-  )[0].innerHTML;
+  if ($("td[CalType='first']").length > 0) {
+    $("td[CalType='first']").each((index, element) => {
+      fistArr.push(Number(element.innerHTML));
+    });
+    $("td[CalType='second']")[0].innerHTML = fistArr.reduce(
+      (previousValue, currentValue) => previousValue + currentValue,
+    );
+    $("td[CalType='third']")[0].innerHTML = $(
+      "td[CalType='second']",
+    )[0].innerHTML;
+    $("td[CalType='forth']")[0].innerHTML = $(
+      "td[CalType='third']",
+    )[0].innerHTML;
+  }
+  $("td[CalType='qita']")[0].innerHTML = $("td[CalType='mache']")[0].innerHTML;
+  $("td[CalType='wuliu']")[0].innerHTML =
+    Number($("td[CalType='shengji']")[0].innerHTML) +
+    Number($("td[CalType='qita']")[0].innerHTML);
+  $("td[CalType='chengben']")[0].innerHTML =
+    Number($("td[CalType='wuliu']")[0].innerHTML) +
+    Number($("td[CalType='forth']")[0].innerHTML);
+  $("td[CalType='notax']")[0].innerHTML =
+    Number($("td[CalType='wuliu']")[0].innerHTML) +
+    Number($("td[CalType='forth']")[0].innerHTML);
+  $("td[CalType='total']")[0].innerHTML =
+    Number($("td[CalType='wuliu']")[0].innerHTML) +
+    Number($("td[CalType='forth']")[0].innerHTML);
 }
 //计算需要运算的字段
 function Expression(row, expn) {
   var rowData = GetRowData(row);
   //循环代值计算
   for (var j = 0; j < row.cells.length; j++) {
-    name = row.parentNode.rows[0].cells[j].getAttribute("Name");
-    if (name) {
+    name = row.cells[j].getAttribute("Name");
+    if (name && name != "null") {
       var reg = new RegExp(name, "i");
       expn = expn.replace(reg, rowData[name].replace(/\,/g, ""));
     }
   }
   return eval(expn);
-}
-
-///
-/**
- * 格式化数字显示方式
- * 用法
- * formatNumber(12345.999,'#,##0.00');
- * formatNumber(12345.999,'#,##0.##');
- * formatNumber(123,'000000');
- * @param num
- * @param pattern
- */
-/* 以下是范例 
-formatNumber('','')=0 
-formatNumber(123456789012.129,null)=123456789012 
-formatNumber(null,null)=0 
-formatNumber(123456789012.129,'#,##0.00')=123,456,789,012.12 
-formatNumber(123456789012.129,'#,##0.##')=123,456,789,012.12 
-formatNumber(123456789012.129,'#0.00')=123,456,789,012.12 
-formatNumber(123456789012.129,'#0.##')=123,456,789,012.12 
-formatNumber(12.129,'0.00')=12.12 
-formatNumber(12.129,'0.##')=12.12 
-formatNumber(12,'00000')=00012 
-formatNumber(12,'#.##')=12 
-formatNumber(12,'#.00')=12.00 
-formatNumber(0,'#.##')=0 
-*/
-function formatNumber(num, pattern) {
-  var strarr = num ? num.toString().split(".") : ["0"];
-  var fmtarr = pattern ? pattern.split(".") : [""];
-  var retstr = "";
-
-  // 整数部分
-  var str = strarr[0];
-  var fmt = fmtarr[0];
-  var i = str.length - 1;
-  var comma = false;
-  for (var f = fmt.length - 1; f >= 0; f--) {
-    switch (fmt.substr(f, 1)) {
-      case "#":
-        if (i >= 0) retstr = str.substr(i--, 1) + retstr;
-        break;
-      case "0":
-        if (i >= 0) retstr = str.substr(i--, 1) + retstr;
-        else retstr = "0" + retstr;
-        break;
-      case ",":
-        comma = true;
-        retstr = "," + retstr;
-        break;
-    }
-  }
-  if (i >= 0) {
-    if (comma) {
-      var l = str.length;
-      for (; i >= 0; i--) {
-        retstr = str.substr(i, 1) + retstr;
-        if (i > 0 && (l - i) % 3 == 0) retstr = "," + retstr;
-      }
-    } else retstr = str.substr(0, i + 1) + retstr;
-  }
-
-  retstr = retstr + ".";
-  // 处理小数部分
-  str = strarr.length > 1 ? strarr[1] : "";
-  fmt = fmtarr.length > 1 ? fmtarr[1] : "";
-  i = 0;
-  for (var f = 0; f < fmt.length; f++) {
-    switch (fmt.substr(f, 1)) {
-      case "#":
-        if (i < str.length) retstr += str.substr(i++, 1);
-        break;
-      case "0":
-        if (i < str.length) retstr += str.substr(i++, 1);
-        else retstr += "0";
-        break;
-    }
-  }
-  return retstr.replace(/^,+/, "").replace(/\.$/, "");
 }
