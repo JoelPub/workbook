@@ -48,19 +48,14 @@ function EditCell(element, editType, editRow) {
     case "TextBox":
       CreateTextBox(element, element.innerHTML);
       break;
-    case "AddSubA":
-      AddSubA(document.getElementById("tabProduct"));
-      break;
-    case "AddSubAA":
-      AddSubAA(document.getElementById("tabProduct"), editRow);
-      break;
     default:
       break;
   }
 }
 
 //添加行
-function AddSubA(table, index) {
+function AddOne() {
+  var table = document.getElementById("tabProduct");
   var lastRow = table.rows[table.rows.length - 1];
   var newRow = lastRow.cloneNode(true);
   newRow.cells[0].innerHTML = "1-1";
@@ -72,21 +67,34 @@ function AddSubA(table, index) {
         (Number(this.cells[0].innerHTML[this.cells[0].innerHTML.length - 1]) +
           1);
   });
-  newRow.cells[1].innerHTML = "";
-  newRow.cells[1].setAttribute("EditType", "AddSubAA");
+  newRow.cells[1].innerHTML =
+    '<button type="button" onclick="AddSubAA()">add </button>';
+  // newRow.cells[1].setAttribute("EditType", "TextBox");
+  newRow.cells[2].innerHTML = "";
+  newRow.cells[3].innerHTML = "";
   if (newRow) table.tBodies[0].appendChild(newRow);
-
   SetRowCanEdit(newRow);
   return newRow;
 }
 
-function AddSubAA(table, r) {
+function AddSubAA() {
+  var table = document.getElementById("tabProduct");
   var lastRow = table.rows[table.rows.length - 1];
   var newRow = lastRow.cloneNode(true);
-  newRow.cells[0].innerHTML = "";
+  newRow.cells[0].innerHTML =
+    event.currentTarget.parentElement.parentElement.cells[0].innerHTML + "-1";
   newRow.cells[1].innerHTML = "";
   newRow.cells[1].setAttribute("EditType", "TextBox");
-  if (newRow) table.tBodies[0].insertBefore(newRow, r.nextSibling);
+  newRow.cells[2].innerHTML = "";
+  newRow.cells[2].setAttribute("EditType", "TextBox");
+  newRow.cells[3].innerHTML = "";
+  newRow.cells[3].setAttribute("EditType", "TextBox");
+  if (newRow)
+    table.tBodies[0].insertBefore(
+      newRow,
+      event.currentTarget.parentElement.parentElement.nextSibling,
+    );
+  // if (newRow) table.tBodies[0].appendChild(newRow);
 
   SetRowCanEdit(newRow);
   return newRow;
