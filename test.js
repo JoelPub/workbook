@@ -72,6 +72,7 @@ function AddOne() {
   // newRow.cells[1].setAttribute("EditType", "TextBox");
   newRow.cells[2].innerHTML = "";
   newRow.cells[3].innerHTML = "";
+  newRow.cells[4].setAttribute("CalType", "second");
   if (newRow) table.tBodies[0].appendChild(newRow);
   SetRowCanEdit(newRow);
   return newRow;
@@ -89,6 +90,10 @@ function AddSubAA() {
   newRow.cells[2].setAttribute("EditType", "TextBox");
   newRow.cells[3].innerHTML = "";
   newRow.cells[3].setAttribute("EditType", "TextBox");
+  newRow.cells[4].innerHTML = "0";
+  newRow.cells[4].setAttribute("Expression", "Amount*Price");
+  newRow.cells[4].setAttribute("Format", "#,###.00");
+  newRow.cells[4].setAttribute("CalType", "first");
   if (newRow)
     table.tBodies[0].insertBefore(
       newRow,
@@ -184,22 +189,38 @@ function GetRowData(row) {
 
 //检查当前数据行中需要运行的字段
 function CheckExpression(row) {
-  for (var j = 0; j < row.cells.length; j++) {
-    expn = row.parentNode.rows[0].cells[j].getAttribute("Expression");
-    //如指定了公式则要求计算
-    if (expn) {
-      var result = Expression(row, expn);
-      var format = row.parentNode.rows[0].cells[j].getAttribute("Format");
-      if (format) {
-        //如指定了格式，进行字值格式化
-        row.cells[j].innerHTML = formatNumber(Expression(row, expn), format);
-      } else {
-        row.cells[j].innerHTML = Expression(row, expn);
-      }
+  // for (var j = 0; j < row.cells.length; j++) {
+  expn = row.cells[4].getAttribute("Expression");
+  //如指定了公式则要求计算
+  if (expn) {
+    var result = Expression(row, expn);
+    var format = row.cells[4].getAttribute("Format");
+    if (format) {
+      //如指定了格式，进行字值格式化
+      row.cells[4].innerHTML = formatNumber(Expression(row, expn), format);
+    } else {
+      row.cells[4].innerHTML = Expression(row, expn);
     }
+    CalAll();
   }
+  // }
 }
-
+function CalAll() {
+  var fistArr = [],
+    secondArr = [];
+  $("td[CalType='second']")[0].innerHTML = $(
+    "td[CalType='first']",
+  )[0].innerHTML;
+  $("td[CalType='first']").each((index, element) => {
+    fistArr.push(Number(element.innerHTML));
+  });
+  $("td[CalType='second']")[0].innerHTML = fistArr.reduce(
+    (previousValue, currentValue) => previousValue + currentValue,
+  );
+  $("td[CalType='third']")[0].innerHTML = $(
+    "td[CalType='second']",
+  )[0].innerHTML;
+}
 //计算需要运算的字段
 function Expression(row, expn) {
   var rowData = GetRowData(row);
